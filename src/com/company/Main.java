@@ -1,6 +1,5 @@
 package com.company;
 
-
 import java.util.HashMap;
 
 public class Main {
@@ -32,13 +31,17 @@ public class Main {
     }
 
     public static void main(String[] args) {
+        if (args.length < 3) {
+            throw new RuntimeException("Для работы программы нужны 3 аргумента");
+        }
 
         String arg1 = (args[0]);
         String arg2 = (args[2]);
         boolean arabicArgs = isArabic(arg1) && isArabic(arg2);
         boolean romanArgs = !isArabic(arg1) && !isArabic(arg2);
-        int number1 = 0;
-        int number2 = 0;
+        int number1;
+        int number2;
+
         if (arabicArgs) {
             number1 = Integer.parseInt(arg1);
             number2 = Integer.parseInt(arg2);
@@ -52,7 +55,8 @@ public class Main {
         validate(number1);
         validate(number2);
         String operation = args[1];
-        int result = 0;
+        int result;
+
         switch (operation) {
             case "+":
                 result = number1 + number2;
@@ -68,19 +72,19 @@ public class Main {
                 break;
             default:
                 throw new IllegalArgumentException(operation + "формат математической операции не удовлетворяет заданию -  (+, -, /, *)");
-
-
         }
+
         if (romanArgs) {
-            validate(result);
-
-            System.out.println(convert(result));
-
+            if (result > 10) {
+                throw new RuntimeException("Римские числа больше 10 в этой версии калькулятора не поддерживаются");
+            } else if (result < 1) {
+                throw new RuntimeException("Резултат менее единицы в римских числах быть не может");
+            } else {
+                System.out.println(convert(result));
+            }
         } else {
             System.out.println(result);
         }
-
-
     }
 
     public static void validate(int arg) {
@@ -94,18 +98,6 @@ public class Main {
             throw new IllegalArgumentException("Не римское");
         }
         return i;
-
-//        arabian.put(1, "I");
-//        arabian.put(2, "II");
-//        arabian.put(3, "III");
-//        arabian.put(4, "IV");
-//        arabian.put(5, "V");
-//        arabian.put(6, "VI");
-//        arabian.put(7, "VII");
-//        arabian.put(8, "VIII");
-//        arabian.put(9, "IX");
-//        arabian.put(10, "X");
-
     }
 
     public static String convert(Integer arg) {
@@ -116,9 +108,7 @@ public class Main {
         return i;
     }
 
-
     public static Boolean isArabic(String arg) {
         return !romanToArabic.containsKey(arg);
-
     }
 }
