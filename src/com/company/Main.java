@@ -1,6 +1,7 @@
 package com.company;
 
-import java.util.HashMap;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
     final static HashMap<String, Integer> romanToArabic = new HashMap<>();
@@ -28,33 +29,45 @@ public class Main {
         arabicToRoman.put(8, "VIII");
         arabicToRoman.put(9, "IX");
         arabicToRoman.put(10, "X");
+        arabicToRoman.put(40, "XL");
+        arabicToRoman.put(50, "L");
+        arabicToRoman.put(90, "XC");
+        arabicToRoman.put(100, "C");
     }
 
     public static void main(String[] args) {
-        if (args.length < 3) {
-            throw new RuntimeException("Для работы программы нужны 3 аргумента");
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Введите пример");
+        String[] inputArgs = scanner.nextLine().toUpperCase().split(" ");
+        if (inputArgs.length != 3) {
+            throw new RuntimeException("Неверный ввод. Пример ввода '1 + 1'");
         }
+        String arg1 = inputArgs[0];
+        String arg2 = inputArgs[2];
+        String operation = inputArgs[1];
 
-        String arg1 = (args[0]);
-        String arg2 = (args[2]);
         boolean arabicArgs = isArabic(arg1) && isArabic(arg2);
         boolean romanArgs = !isArabic(arg1) && !isArabic(arg2);
         int number1;
         int number2;
 
         if (arabicArgs) {
-            number1 = Integer.parseInt(arg1);
-            number2 = Integer.parseInt(arg2);
+            try {
+                number1 = Integer.parseInt(arg1);
+                number2 = Integer.parseInt(arg2);
+            } catch (NumberFormatException exception) {
+                throw new RuntimeException("Неверный ввод " + exception.getMessage());
+            }
         } else if (romanArgs) {
             number1 = convert(arg1);
             number2 = convert(arg2);
         } else {
-            throw new RuntimeException("Аргументы разных типов");
+            throw new RuntimeException("Некорректные аргументы");
         }
 
         validate(number1);
         validate(number2);
-        String operation = args[1];
+
         int result;
 
         switch (operation) {
@@ -75,12 +88,25 @@ public class Main {
         }
 
         if (romanArgs) {
-            if (result > 10) {
-                throw new RuntimeException("Римские числа больше 10 в этой версии калькулятора не поддерживаются");
-            } else if (result < 1) {
-                throw new RuntimeException("Резултат менее единицы в римских числах быть не может");
+            if (result < 1) {
+                throw new RuntimeException("Результат менее единицы в римских числах быть не может");
             } else {
-                System.out.println(convert(result));
+                List<Map.Entry<Integer, String>> reversedArabicToRomanEntryList = arabicToRoman.entrySet().stream()
+                        .sorted(Comparator.comparing(Map.Entry<Integer, String>::getKey).reversed())
+                        .collect(Collectors.toList());
+                StringBuilder romanResult = new StringBuilder();
+                int i = 0;
+                while (result > 0) {
+                    Map.Entry<Integer, String> entry = reversedArabicToRomanEntryList.get(i);
+                    if (result >= entry.getKey()) {
+                        romanResult.append(entry.getValue());
+                        result = result - entry.getKey();
+                    }
+                    if (result < entry.getKey()) {
+                        i++;
+                    }
+                }
+                System.out.println(romanResult);
             }
         } else {
             System.out.println(result);
@@ -96,14 +122,6 @@ public class Main {
         Integer i = romanToArabic.get(arg);
         if (i == null) {
             throw new IllegalArgumentException("Не римское");
-        }
-        return i;
-    }
-
-    public static String convert(Integer arg) {
-        String i = arabicToRoman.get(arg);
-        if (i == null) {
-            throw new IllegalArgumentException("Не арабское");
         }
         return i;
     }
